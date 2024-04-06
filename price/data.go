@@ -4,7 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"regexp"
+	"strconv"
+	"strings"
 	"time"
+
+	"github.com/Jeffail/gabs/v2"
 )
 
 type GeckoterminalResponse struct {
@@ -92,10 +97,10 @@ type GeckoterminalResponse struct {
 	} `json:"data"`
 }
 
-func getData(dataURL string) (GeckoterminalResponse, error) {
+func GetData(dataURL string) (GeckoterminalResponse, error) {
 	var data GeckoterminalResponse
 
-	err := getJson(dataURL, &data)
+	err := GetJson(dataURL, &data)
 	if err != nil {
 		return data, err
 	}
@@ -103,7 +108,7 @@ func getData(dataURL string) (GeckoterminalResponse, error) {
 	return data, nil
 }
 
-func getJson(dataURL string, target interface{}) error {
+func GetJson(dataURL string, target interface{}) error {
 	req, err := http.NewRequest("GET", dataURL, nil)
 	if err != nil {
 		return err
@@ -127,4 +132,131 @@ func getJson(dataURL string, target interface{}) error {
 	}
 
 	return nil
+}
+
+func Format(data GeckoterminalResponse) string {
+	coinPrice, err := strconv.ParseFloat(data.Data.Attributes.BaseTokenPriceUsd, 64)
+	if err != nil {
+		coinPrice = 0.0
+	}
+
+	volume, err := strconv.ParseFloat(data.Data.Attributes.VolumeUsd.H24, 64)
+	if err != nil {
+		volume = 0.0
+	}
+
+	mcap, err := strconv.ParseFloat(data.Data.Attributes.FdvUsd, 64)
+	if err != nil {
+		mcap = 0.0
+	}
+
+	m5PricePercentage, err := strconv.ParseFloat(data.Data.Attributes.PriceChangePercentage.M5, 64)
+	if err != nil {
+		m5PricePercentage = 0
+	}
+
+	emoji := "🎱"
+
+	if m5PricePercentage > 15 {
+		emoji = "🚀🚀🚀"
+	} else if m5PricePercentage > 5 {
+		emoji = "🚀"
+	} else if m5PricePercentage > 0 {
+		emoji = "🟢"
+	} else if m5PricePercentage < 0 {
+		emoji = "🔴"
+	}
+
+	return fmt.Sprintf("%s ANON: %s 24H: %s MC: %s", emoji, humanizeMoney(coinPrice), humanizeMoney(volume), humanizeMoney(mcap))
+}
+
+func humanizeMoney(money float64) string {
+	if money < 1 && money > 0.01 {
+		return fmt.Sprintf("$%.3f", money)
+	}
+	if money < 1 && money > 0.001 {
+		return fmt.Sprintf("$%.4f", money)
+	}
+	if money < 1 && money > 0.0001 {
+		return fmt.Sprintf("$%.5f", money)
+	}
+
+	if money < 1000 {
+		return fmt.Sprintf("$%.2f", money)
+	}
+
+	if money < 1000000 {
+		return fmt.Sprintf("$%.2fK", money/1000)
+	}
+
+	if money < 1000000000 {
+		return fmt.Sprintf("$%.2fM", money/1000000)
+	}
+
+	return fmt.Sprintf("$%.2f", money)
+}
+
+func Replacer(template string, data GeckoterminalResponse) string {
+	wrapped := gabs.Wrap(data)
+	jsonOutput := wrapped.String()
+	wrapped, _ = gabs.ParseJSON([]byte(jsonOutput))
+
+	re := regexp.MustCompile(`[F|S|E]{[^{}]*}`)
+
+	substitutor := func(match string) string {
+		isFloat := strings.HasPrefix(match, "F")
+		isString := strings.HasPrefix(match, "S")
+		isEmoji := strings.HasPrefix(match, "E")
+
+		varName := match[2 : len(match)-1]
+
+		value := ""
+		if wrapped.ExistsP(varName) {
+			switch {
+			case isEmoji:
+				tempVal := 0.00
+				val, found := wrapped.Path(varName).Data().(float64)
+				if found {
+					tempVal = val
+				} else {
+					value = wrapped.Path(varName).Data().(string)
+					val, err := strconv.ParseFloat(value, 64)
+					if err == nil {
+						tempVal = val
+					}
+				}
+
+				if tempVal > 15 {
+					value = "🚀🚀🚀"
+				} else if tempVal > 5 {
+					value = "🚀"
+				} else if tempVal > 0 {
+					value = "🟢"
+				} else if tempVal < 0 {
+					value = "🔴"
+				} else {
+					value = "🎱"
+				}
+			case isFloat:
+				val, found := wrapped.Path(varName).Data().(float64)
+				if found {
+					value = humanizeMoney(val)
+				} else {
+					value = wrapped.Path(varName).Data().(string)
+					val, err := strconv.ParseFloat(value, 64)
+					if err == nil {
+						value = humanizeMoney(val)
+					}
+				}
+			case isString:
+				value = wrapped.Path(varName).Data().(string)
+			default:
+				value = fmt.Sprintf("%v", wrapped.Path(varName).Data())
+			}
+		}
+
+		return value
+	}
+
+	return re.ReplaceAllStringFunc(template, substitutor)
 }

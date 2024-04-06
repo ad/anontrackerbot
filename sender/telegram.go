@@ -69,13 +69,15 @@ func (s *Sender) replyWithCoin(ctx context.Context, b *bot.Bot, update *models.U
 		fmt.Println(err)
 	}
 
+	msg := price.Replacer(s.config.MESSAGE_FORMAT, pr)
+
 	// s.logger.Info(fmt.Sprintf("New message %d:%d:%d", update.Message.Chat.ID, update.Message.MessageThreadID, update.Message.ID))
 
-	msg, err := b.SendMessage(
+	sentMsg, err := b.SendMessage(
 		context.Background(),
 		&bot.SendMessageParams{
 			ChatID:          fmt.Sprintf("%d_%d", update.Message.Chat.ID, update.Message.MessageThreadID),
-			Text:            price.Format(pr),
+			Text:            msg,
 			MessageThreadID: update.Message.MessageThreadID,
 		},
 	)
@@ -84,7 +86,7 @@ func (s *Sender) replyWithCoin(ctx context.Context, b *bot.Bot, update *models.U
 		fmt.Println(err)
 	}
 
-	if msg != nil {
-		s.logger.Info(fmt.Sprintf("New message %d:%d:%d", msg.Chat.ID, msg.MessageThreadID, msg.ID))
+	if sentMsg != nil {
+		s.logger.Info(fmt.Sprintf("New message %d:%d:%d", sentMsg.Chat.ID, sentMsg.MessageThreadID, sentMsg.ID))
 	}
 }

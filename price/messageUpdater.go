@@ -1,11 +1,13 @@
 package price
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
-	"strconv"
+	"time"
 
 	"github.com/ad/anontrackerbot/config"
+	"github.com/go-telegram/bot"
 )
 
 type Price struct {
@@ -25,7 +27,7 @@ func InitPrice(logger *slog.Logger, config *config.Config) (*Price, error) {
 func (su *Price) Get() (GeckoterminalResponse, error) {
 	dataURL := su.config.DATA_URL
 
-	data, err := getData(dataURL)
+	data, err := GetData(dataURL)
 	if err != nil {
 		return data, err
 	}
@@ -33,68 +35,41 @@ func (su *Price) Get() (GeckoterminalResponse, error) {
 	return data, nil
 }
 
-func Format(data GeckoterminalResponse) string {
-	coinPrice, err := strconv.ParseFloat(data.Data.Attributes.BaseTokenPriceUsd, 64)
-	if err != nil {
-		coinPrice = 0.0
-	}
+func (su *Price) Run(b *bot.Bot) error {
+	updateTicker := time.NewTicker(time.Duration(su.config.UPDATE_DELAY) * time.Second)
 
-	volume, err := strconv.ParseFloat(data.Data.Attributes.VolumeUsd.H24, 64)
-	if err != nil {
-		volume = 0.0
-	}
+	go func(b *bot.Bot) {
+		for range updateTicker.C {
+			data, err := su.Get()
+			if err != nil {
+				fmt.Println(err)
+			}
 
-	mcap, err := strconv.ParseFloat(data.Data.Attributes.FdvUsd, 64)
-	if err != nil {
-		mcap = 0.0
-	}
+			msg := Replacer(su.config.MESSAGE_FORMAT, data)
 
-	m5PricePercentage, err := strconv.ParseFloat(data.Data.Attributes.PriceChangePercentage.M5, 64)
-	if err != nil {
-		m5PricePercentage = 0
-	}
+			for _, target := range su.config.UpdateMessageList {
+				_, err := b.EditMessageText(context.Background(), &bot.EditMessageTextParams{
+					ChatID:    fmt.Sprintf("%d_%d", target.ChatID, target.MessageThreadID),
+					MessageID: int(target.MessageID),
+					Text:      msg,
+				})
 
-	emoji := "🎱"
+				if err != nil {
+					fmt.Println(err)
 
-	if m5PricePercentage > 10 {
-		emoji = "🚀"
-	} else if m5PricePercentage > 50 {
-		emoji = "🚀🚀🚀"
-	} else if m5PricePercentage > 0 {
-		emoji = "🟢"
-	} else if m5PricePercentage < 0 {
-		emoji = "🔴"
-	}
+					continue
+				}
 
-	return fmt.Sprintf("%s ANON: %s 24H: %s MC: %s", emoji, humanizeSmallMoney(coinPrice), humanizeBigMoney(volume), humanizeBigMoney(mcap))
-}
+				// fmt.Println(m)
 
-func humanizeBigMoney(money float64) string {
-	if money < 1000 {
-		return fmt.Sprintf("$%.2f", money)
-	}
+				// sender.MakeRequestDeferred(sndr.DeferredMessage{
+				// 	Method: "sendMessage",
+				// 	ChatID: target.ChatID,
+				// 	Text:   msg,
+				// }, sender.SendResult)
+			}
+		}
+	}(b)
 
-	if money < 1000000 {
-		return fmt.Sprintf("$%.2fK", money/1000)
-	}
-
-	if money < 1000000000 {
-		return fmt.Sprintf("$%.2fM", money/1000000)
-	}
-
-	return fmt.Sprintf("$%.2fB", money/1000000000)
-}
-
-func humanizeSmallMoney(money float64) string {
-	if money > 0.01 {
-		return fmt.Sprintf("$%.3f", money)
-	}
-	if money > 0.001 {
-		return fmt.Sprintf("$%.4f", money)
-	}
-	if money > 0.0001 {
-		return fmt.Sprintf("$%.5f", money)
-	}
-
-	return fmt.Sprintf("$%.2f", money)
+	return nil
 }

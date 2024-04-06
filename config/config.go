@@ -25,6 +25,8 @@ type Config struct {
 
 	DATA_URL string `json:"DATA_URL"`
 
+	MESSAGE_FORMAT string `json:"MESSAGE_FORMAT"`
+
 	UPDATE_DELAY int `json:"UPDATE_DELAY"`
 
 	Debug bool `json:"DEBUG"`
@@ -67,6 +69,8 @@ func InitConfig(args []string) (*Config, error) {
 		flags.StringVar(&config.UPDATE_MESSAGES, "updateMessages", lookupEnvOrString("UPDATE_MESSAGES", config.UPDATE_MESSAGES), "UPDATE_MESSAGES")
 
 		flags.StringVar(&config.DATA_URL, "dataUrl", lookupEnvOrString("DATA_URL", config.DATA_URL), "DATA_URL")
+
+		flags.StringVar(&config.MESSAGE_FORMAT, "messageFormat", lookupEnvOrString("MESSAGE_FORMAT", config.MESSAGE_FORMAT), "MESSAGE_FORMAT")
 
 		flags.IntVar(&config.UPDATE_DELAY, "updateDelay", lookupEnvOrInt("UPDATE_DELAY", config.UPDATE_DELAY), "UPDATE_DELAY")
 
