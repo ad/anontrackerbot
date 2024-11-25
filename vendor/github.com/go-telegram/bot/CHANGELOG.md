@@ -1,5 +1,21 @@
 # Changelog
 
+## v1.11.1 (2024-11-21)
+
+- fix CreateNewStickerSetParams (#132) 
+
+## v1.11.0 (2024-11-18)
+
+- support API v8.0
+
+## v1.10.1 (2024-11-08)
+
+- Fix arm64 panic (#130) 
+
+## v1.10.0 (2024-10-31)
+
+- support API v7.11
+
 ## v1.9.1 (2024-10-21)
 
 - fix unmarshal `ChatBackground` type (#126)
