@@ -6,7 +6,7 @@
 
 > [Telegram Group](https://t.me/gotelegrambotui)
 
-> Supports Bot API version: [8.3](https://core.telegram.org/bots/api#february-12-2025) from February 12, 2025
+> Supports Bot API version: [9.0](https://core.telegram.org/bots/api#april-11-2025) from April 11, 2025
 
 It's a Go zero-dependencies telegram bot framework
 
@@ -211,6 +211,7 @@ In this example, the handler will be called when the user sends `/start` message
 Handler Types:
 - `HandlerTypeMessageText` - for Update.Message.Text field
 - `HandlerTypeCallbackQueryData` - for Update.CallbackQuery.Data field
+- `HandlerTypeCallbackQueryGameShortName` - for Update.CallbackQuery.GameShortName field
 - `HandlerTypePhotoCaption` - for Update.Message.Caption field
 
 RegisterHandler returns a handler ID string. You can use it to remove the handler later.
@@ -223,6 +224,10 @@ Match Types:
 - `MatchTypeExact`
 - `MatchTypePrefix`
 - `MatchTypeContains`
+- `MatchTypeCommand`
+- `MatchTypeCommandStartOnly`
+
+> For `MatchTypeCommand` and `MatchTypeCommandStartOnly` usage see an [example](examples/command_handler/main.go)
 
 You can use `RegisterHandlerRegexp` to match by regular expression.
 
