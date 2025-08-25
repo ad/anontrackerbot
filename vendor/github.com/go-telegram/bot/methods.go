@@ -188,6 +188,13 @@ func (b *Bot) SendPoll(ctx context.Context, params *SendPollParams) (*models.Mes
 	return result, err
 }
 
+// SendChecklist https://core.telegram.org/bots/api#sendchecklist
+func (b *Bot) SendChecklist(ctx context.Context, params *SendChecklistParams) (*models.Message, error) {
+	result := &models.Message{}
+	err := b.rawRequest(ctx, "sendChecklist", params, &result)
+	return result, err
+}
+
 // SendDice https://core.telegram.org/bots/api#senddice
 func (b *Bot) SendDice(ctx context.Context, params *SendDiceParams) (*models.Message, error) {
 	result := &models.Message{}
@@ -664,6 +671,13 @@ func (b *Bot) EditMessageMedia(ctx context.Context, params *EditMessageMediaPara
 	return result, err
 }
 
+// EditMessageChecklist https://core.telegram.org/bots/api#editmessagechecklist
+func (b *Bot) EditMessageChecklist(ctx context.Context, params *EditMessageChecklistParams) (*models.Message, error) {
+	result := &models.Message{}
+	err := b.rawRequest(ctx, "editMessageChecklist", params, result)
+	return result, err
+}
+
 // EditMessageReplyMarkup https://core.telegram.org/bots/api#editmessagereplymarkup
 func (b *Bot) EditMessageReplyMarkup(ctx context.Context, params *EditMessageReplyMarkupParams) (*models.Message, error) {
 	result := &models.Message{}
@@ -675,6 +689,20 @@ func (b *Bot) EditMessageReplyMarkup(ctx context.Context, params *EditMessageRep
 func (b *Bot) StopPoll(ctx context.Context, params *StopPollParams) (*models.Poll, error) {
 	result := &models.Poll{}
 	err := b.rawRequest(ctx, "stopPoll", params, &result)
+	return result, err
+}
+
+// ApproveSuggestedPost https://core.telegram.org/bots/api#approvesuggestedpost
+func (b *Bot) ApproveSuggestedPost(ctx context.Context, params *ApproveSuggestedPostParams) (bool, error) {
+	var result bool
+	err := b.rawRequest(ctx, "approveSuggestedPost", params, &result)
+	return result, err
+}
+
+// DeclineSuggestedPost https://core.telegram.org/bots/api#declinesuggestedpost
+func (b *Bot) DeclineSuggestedPost(ctx context.Context, params *DeclineSuggestedPostParams) (bool, error) {
+	var result bool
+	err := b.rawRequest(ctx, "declineSuggestedPost", params, &result)
 	return result, err
 }
 
@@ -851,6 +879,13 @@ func (b *Bot) AnswerPreCheckoutQuery(ctx context.Context, params *AnswerPreCheck
 	var result bool
 	err := b.rawRequest(ctx, "answerPreCheckoutQuery", params, &result)
 	return result, err
+}
+
+// GetMyStarBalance https://core.telegram.org/bots/api#getmystarbalance
+func (b *Bot) GetMyStarBalance(ctx context.Context) (*models.StarAmount, error) {
+	result := models.StarAmount{}
+	err := b.rawRequest(ctx, "getMyStarBalance", nil, &result)
+	return &result, err
 }
 
 // GetStarTransactions https://core.telegram.org/bots/api#getstartransactions

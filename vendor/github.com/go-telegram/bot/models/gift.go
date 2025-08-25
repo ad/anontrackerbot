@@ -18,6 +18,7 @@ type Gift struct {
 	UpgradeStarCount int     `json:"upgrade_star_count,omitempty"`
 	TotalCount       int     `json:"total_count,omitempty"`
 	RemainingCount   int     `json:"remaining_count,omitempty"`
+	PublisherChat    *Chat   `json:"publisher_chat,omitempty"`
 }
 
 // AcceptedGiftTypes https://core.telegram.org/bots/api#acceptedgifttypes
@@ -83,8 +84,15 @@ type OwnedGiftRegular struct {
 
 // OwnedGiftUnique https://core.telegram.org/bots/api#ownedgiftunique
 type OwnedGiftUnique struct {
-	Type OwnedGiftType `json:"type"`
-	Gift UniqueGift    `json:"gift"`
+	Type              OwnedGiftType `json:"type"`
+	Gift              UniqueGift    `json:"gift"`
+	OwnedGiftID       string        `json:"owned_gift_id,omitempty"`
+	SenderUser        *User         `json:"sender_user,omitempty"`
+	SendDate          int           `json:"send_date"`
+	IsSaved           bool          `json:"is_saved,omitempty"`
+	CanBeTransferred  bool          `json:"can_be_transferred,omitempty"`
+	TransferStarCount int           `json:"transfer_star_count,omitempty"`
+	NextTransferDate  int           `json:"next_transfer_date,omitempty"`
 }
 
 // OwnedGifts https://core.telegram.org/bots/api#ownedgifts
@@ -96,12 +104,13 @@ type OwnedGifts struct {
 
 // UniqueGift https://core.telegram.org/bots/api#uniquegift
 type UniqueGift struct {
-	BaseName string             `json:"base_name"`
-	Name     string             `json:"name"`
-	Number   int                `json:"number"`
-	Model    UniqueGiftModel    `json:"model"`
-	Symbol   UniqueGiftSymbol   `json:"symbol"`
-	Backdrop UniqueGiftBackdrop `json:"backdrop"`
+	BaseName      string             `json:"base_name"`
+	Name          string             `json:"name"`
+	Number        int                `json:"number"`
+	Model         UniqueGiftModel    `json:"model"`
+	Symbol        UniqueGiftSymbol   `json:"symbol"`
+	Backdrop      UniqueGiftBackdrop `json:"backdrop"`
+	PublisherChat *Chat              `json:"publisher_chat,omitempty"`
 }
 
 // UniqueGiftModel https://core.telegram.org/bots/api#uniquegiftmodel
@@ -147,8 +156,9 @@ type GiftInfo struct {
 
 // UniqueGiftInfo https://core.telegram.org/bots/api#uniquegiftinfo
 type UniqueGiftInfo struct {
-	Gift              UniqueGift `json:"gift"`
-	Origin            string     `json:"origin"`
-	OwnedGiftID       string     `json:"owned_gift_id,omitempty"`
-	TransferStarCount int        `json:"transfer_star_count,omitempty"`
+	Gift                UniqueGift `json:"gift"`
+	Origin              string     `json:"origin"`
+	LastResaleStarCount int        `json:"last_resale_star_count,omitempty"`
+	OwnedGiftID         string     `json:"owned_gift_id,omitempty"`
+	TransferStarCount   int        `json:"transfer_star_count,omitempty"`
 }

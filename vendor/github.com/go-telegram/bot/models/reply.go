@@ -30,6 +30,7 @@ type ExternalReplyInfo struct {
 	VideoNote          *VideoNote          `json:"video_note,omitempty"`
 	Voice              *Voice              `json:"voice,omitempty"`
 	HasMediaSpoiler    bool                `json:"has_media_spoiler,omitempty"`
+	Checklist          *Checklist          `json:"checklist,omitempty"`
 	Contact            *Contact            `json:"contact,omitempty"`
 	Dice               *Dice               `json:"dice,omitempty"`
 	Game               *Game               `json:"game,omitempty"`
@@ -50,6 +51,7 @@ type ReplyParameters struct {
 	QuoteParseMode           ParseMode       `json:"quote_parse_mode,omitempty"`
 	QuoteEntities            []MessageEntity `json:"quote_entities,omitempty"`
 	QuotePosition            int             `json:"quote_position,omitempty"`
+	ChecklistTaskID          int             `json:"checklist_task_id,omitempty"`
 }
 
 // MessageOriginType https://core.telegram.org/bots/api#messageorigin
