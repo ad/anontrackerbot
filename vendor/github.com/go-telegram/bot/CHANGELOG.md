@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.17.0 (2025-08-18)
+
+- api 9.2 (#207) 
+- fix: hide token from logs (#206) 
+- use io.Pipe for build request (#205)
+- 🛠️ fix: models.InputSticker model handling/usage (#201)
+- style: replace empty `interface{}` with `any` (#200) 
+
+## v1.16.0 (2025-07-08)
+
+- support API 9.1 (#194)
+
 ## v1.15.0 (2025-04-29)
 
 - support API 9.0 (#176)
